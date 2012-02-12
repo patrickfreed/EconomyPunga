@@ -28,7 +28,7 @@ public class EconomyPungaEventListener implements Listener{
 
 		EntityDamageByEntityEvent newevent = (EntityDamageByEntityEvent) event;
 			
-		if(event.getCause().toString() == "ENTITY_ATTACK"){
+		if(event.getCause().toString().equals("ENTITY_ATTACK")){
 			if(newevent.getDamager() instanceof Player){
 				Player pvper = (Player) newevent.getDamager();
 				data.put((Player) event.getEntity(), pvper);
@@ -36,7 +36,7 @@ public class EconomyPungaEventListener implements Listener{
 				Player pvper = (Player) ((Arrow) newevent.getDamager()).getShooter();
 				data.put((Player) event.getEntity(), pvper);
 			}else if(newevent.getDamager() instanceof Monster){
-				
+				//TODO: Other entities
 			}else{
 				data.put((Player) event.getEntity(), null);
 			}

@@ -33,7 +33,7 @@ public class EconomyPunga extends JavaPlugin {
 		pm.registerEvents(new EconomyPungaEventListener(), this);
 		
 		if(!setupEconomy()){
-			System.err.println("[EconomyPunga] Vault not found, disabling...");
+			System.err.println("[EconomyPunga] Vault/Economy not found, disabling...");
 			pm.disablePlugin(this);
 		}
 		
