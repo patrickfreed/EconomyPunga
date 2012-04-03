@@ -3,6 +3,7 @@ package me.patrickfreed.EconomyPunga;
 import java.util.HashMap;
 import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Monster;
@@ -10,38 +11,38 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 public class EconomyPungaEventListener implements Listener{
 
-	public static HashMap<Player, Player> data = new HashMap<Player, Player>();
+	public static HashMap<String, String> data = new HashMap<String, String>();
 
 	@EventHandler
-	public void onEntityDamage(EntityDamageEvent event) {
-		if(event.isCancelled()) return;
+	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {    
+	    if(event.isCancelled()) return;
 		if(!(event.getEntity() instanceof Player)) return;
-		if(!(event instanceof EntityDamageByEntityEvent)){
-			data.put((Player) event.getEntity(), null);
-			return;
-		}
-
-		EntityDamageByEntityEvent newevent = (EntityDamageByEntityEvent) event;
+		
+		Player victim = (Player)event.getEntity();
 			
 		if(event.getCause().toString().equals("ENTITY_ATTACK")){
-			if(newevent.getDamager() instanceof Player){
-				Player pvper = (Player) newevent.getDamager();
-				data.put((Player) event.getEntity(), pvper);
-			}else if(newevent.getDamager() instanceof Arrow){
-				Player pvper = (Player) ((Arrow) newevent.getDamager()).getShooter();
-				data.put((Player) event.getEntity(), pvper);
-			}else if(newevent.getDamager() instanceof Monster){
+			if(event.getDamager() instanceof Player){
+				Player pvperPlayer = (Player) event.getDamager();
+				String pvper = pvperPlayer.getName();
+				data.put(victim.getName(), pvper);
+			}else if(event.getDamager() instanceof Monster){
 				//TODO: Other entities
 			}else{
-				data.put((Player) event.getEntity(), null);
+				data.put(victim.getName(), null);
 			}
+		}else if(event.getCause() == DamageCause.PROJECTILE){
+		    if(event.getDamager() instanceof Arrow){
+		        Player pvperPlayer = (Player) ((Arrow) event.getDamager()).getShooter();
+		        String pvper = pvperPlayer.getName();
+		        data.put(victim.getName(), pvper);
+		    }
 		}else{
-			data.put((Player) event.getEntity(), null);
+			data.put(victim.getName(), null);
 		}
 	}
 
@@ -49,14 +50,16 @@ public class EconomyPungaEventListener implements Listener{
 	public void onEntityDeath(EntityDeathEvent event) {
 		
 		if(!(event.getEntity() instanceof Player))return;
-		if(data.get((Player)event.getEntity()) == null) return;
+		
+		Player victim = (Player)event.getEntity();
+		if(data.get(victim.getName()) == null) return;
 
-		Player player = (Player)event.getEntity();
-		Player pvper = data.get(player);
+		String pvper = data.get(victim.getName());
+		Player pvperPlayer = Bukkit.getServer().getPlayer(pvper);
 		            
-			if ((player.hasPermission("economypunga.use") || player.isOp() || player.hasPermission("economyPunga.victim")) && (pvper.hasPermission("economypunga.use") || pvper.hasPermission("EconomyPunga.killer") || pvper.isOp())){
+			if ((victim.hasPermission("economypunga.use") || victim.isOp() || victim.hasPermission("economyPunga.victim")) && (pvperPlayer.hasPermission("economypunga.use") || pvperPlayer.hasPermission("EconomyPunga.killer") || pvperPlayer.isOp())){
 
-				double victimBalance = EconomyPunga.economy.getBalance(player.getName());
+				double victimBalance = EconomyPunga.economy.getBalance(victim.getName());
 				
 				double percentage;
 				double amount;
@@ -77,27 +80,27 @@ public class EconomyPungaEventListener implements Listener{
 				}
 
 				if (victimBalance > amount) {
-					EconomyPunga.economy.withdrawPlayer(player.getName(), amount);
-					EconomyPunga.economy.depositPlayer(pvper.getName(), amount);
+					EconomyPunga.economy.withdrawPlayer(victim.getName(), amount);
+					EconomyPunga.economy.depositPlayer(pvper, amount);
 				} else if (victimBalance > 0) {
-					EconomyPunga.economy.depositPlayer(pvper.getName(), victimBalance);
+					EconomyPunga.economy.depositPlayer(pvper, victimBalance);
 					amount = victimBalance;
-					EconomyPunga.economy.withdrawPlayer(player.getName(), victimBalance);
+					EconomyPunga.economy.withdrawPlayer(victim.getName(), victimBalance);
 				} else {
 					amount = 0;
 				}
 
-				String Attacker = Config.getKillMsg().replace("%d", player.getName());
-				String Dead = Config.getDeathmsg().replace("%d", player.getName());
+				String Attacker = Config.getKillMsg().replace("%d", victim.getName());
+				String Dead = Config.getDeathmsg().replace("%d", victim.getName());
 
-				Attacker = Attacker.replace("%a", pvper.getName());
-				Dead = Dead.replace("%a", pvper.getName());
+				Attacker = Attacker.replace("%a", pvper);
+				Dead = Dead.replace("%a", pvper);
 
 				Attacker = Attacker.replace("%n", EconomyPunga.economy.format(amount));
 				Dead = Dead.replace("%n", EconomyPunga.economy.format(amount));
 
-				pvper.sendMessage(parseColors(Attacker));
-				player.sendMessage(parseColors(Dead));
+				pvperPlayer.sendMessage(parseColors(Attacker));
+				victim.sendMessage(parseColors(Dead));
 			}
 		}
 
