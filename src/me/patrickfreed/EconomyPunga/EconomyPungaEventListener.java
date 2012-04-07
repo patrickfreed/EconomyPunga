@@ -31,7 +31,7 @@ public class EconomyPungaEventListener implements Listener{
 				String pvper = pvperPlayer.getName();
 				data.put(victim.getName(), pvper);
 			}else if(event.getDamager() instanceof Monster){
-				//TODO: Other entities
+				data.put(victim.getName(), null);
 			}else{
 				data.put(victim.getName(), null);
 			}
@@ -42,7 +42,11 @@ public class EconomyPungaEventListener implements Listener{
 		        	Player pvperPlayer = (Player)arrow.getShooter();
 		        	String pvper = pvperPlayer.getName();
 		        	data.put(victim.getName(), pvper);
+		        }else{
+		        	data.put(victim.getName(), null);
 		        }
+		    }else{
+		    	data.put(victim.getName(), null);
 		    }
 		}else{
 			data.put(victim.getName(), null);
