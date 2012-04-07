@@ -37,9 +37,12 @@ public class EconomyPungaEventListener implements Listener{
 			}
 		}else if(event.getCause() == DamageCause.PROJECTILE){
 		    if(event.getDamager() instanceof Arrow){
-		        Player pvperPlayer = (Player) ((Arrow) event.getDamager()).getShooter();
-		        String pvper = pvperPlayer.getName();
-		        data.put(victim.getName(), pvper);
+		        Arrow arrow = (Arrow)event.getDamager();
+		        if(arrow.getShooter() instanceof Player){
+		        	Player pvperPlayer = (Player)arrow.getShooter();
+		        	String pvper = pvperPlayer.getName();
+		        	data.put(victim.getName(), pvper);
+		        }
 		    }
 		}else{
 			data.put(victim.getName(), null);
