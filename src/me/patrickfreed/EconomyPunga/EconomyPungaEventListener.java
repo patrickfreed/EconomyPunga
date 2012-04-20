@@ -6,11 +6,11 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 
@@ -19,25 +19,29 @@ public class EconomyPungaEventListener implements Listener{
 	public static HashMap<String, String> data = new HashMap<String, String>();
 
 	@EventHandler
-	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {    
+	public void onEntityDamage(EntityDamageEvent event) {    
 	    if(event.isCancelled()) return;
 		if(!(event.getEntity() instanceof Player)) return;
-		
+	    
 		Player victim = (Player)event.getEntity();
+		if(!(event instanceof EntityDamageByEntityEvent)) {
+		    data.put(victim.getName(), null);
+		    return;
+		}
+		
+		EntityDamageByEntityEvent newEvent = (EntityDamageByEntityEvent) event;
 			
-		if(event.getCause().toString().equals("ENTITY_ATTACK")){
-			if(event.getDamager() instanceof Player){
-				Player pvperPlayer = (Player) event.getDamager();
+		if(event.getCause() == DamageCause.ENTITY_ATTACK){
+			if(newEvent.getDamager() instanceof Player){
+				Player pvperPlayer = (Player) newEvent.getDamager();
 				String pvper = pvperPlayer.getName();
 				data.put(victim.getName(), pvper);
-			}else if(event.getDamager() instanceof Monster){
-				data.put(victim.getName(), null);
 			}else{
 				data.put(victim.getName(), null);
 			}
 		}else if(event.getCause() == DamageCause.PROJECTILE){
-		    if(event.getDamager() instanceof Arrow){
-		        Arrow arrow = (Arrow)event.getDamager();
+		    if(newEvent.getDamager() instanceof Arrow){
+		        Arrow arrow = (Arrow)newEvent.getDamager();
 		        if(arrow.getShooter() instanceof Player){
 		        	Player pvperPlayer = (Player)arrow.getShooter();
 		        	String pvper = pvperPlayer.getName();
@@ -48,8 +52,6 @@ public class EconomyPungaEventListener implements Listener{
 		    }else{
 		    	data.put(victim.getName(), null);
 		    }
-		}else{
-			data.put(victim.getName(), null);
 		}
 	}
 
