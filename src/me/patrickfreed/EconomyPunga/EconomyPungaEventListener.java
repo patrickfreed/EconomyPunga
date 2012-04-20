@@ -52,6 +52,8 @@ public class EconomyPungaEventListener implements Listener{
 		    }else{
 		    	data.put(victim.getName(), null);
 		    }
+		}else{
+		    data.put(victim.getName(), null);
 		}
 	}
 
