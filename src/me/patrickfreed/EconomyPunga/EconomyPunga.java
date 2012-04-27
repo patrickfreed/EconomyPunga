@@ -38,8 +38,8 @@ public class EconomyPunga extends JavaPlugin {
 		}
 		
 		try {
-		    Metrics metrics = new Metrics();
-		    metrics.beginMeasuringPlugin(this);
+		    Metrics metrics = new Metrics(this);
+		    metrics.start();
 		} catch (IOException e) {
 			System.err.println("[EconomyPunga]Statistics tracking failure");
 		}
